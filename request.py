@@ -15,6 +15,10 @@ def main():
     data = response.json()
     print("JSON data:", data)
 
+    # Select the value of 'INR'
+    inr_value = data['rates']['INR']
+    print("INR value:", inr_value)
+
 
 if __name__ == "__main__":
     main()
