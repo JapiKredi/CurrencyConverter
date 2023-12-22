@@ -5,7 +5,7 @@ import json
 API_KEY = open("API_Key.txt", "r").read().strip()
 
 def main():
-    payload={"symbols":"INR"}
+    payload={"symbols":["INR", "GBP"]}
     
     url = f"http://api.exchangeratesapi.io/latest?access_key={API_KEY}"
     response = requests.get(url, verify=False,params=payload)
