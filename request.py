@@ -1,6 +1,13 @@
 import requests
 import json
 
+
+API_KEY = "YOUR_API_KEY"  # Replace with your actual API key
+
+# Read the Api_key
+API_KEY = open("OpenAI_API_Key.txt", "r").read().strip()
+
+
 def main():
     response=requests.get('https://api.exchangeratesapi.io/latest')
     if response.status_code !=200:
