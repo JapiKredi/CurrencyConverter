@@ -13,19 +13,20 @@ def get_currency_value(currency_symbol):
 
     data = response.json()
 
-    # Check if the currency symbol exists in the rates dictionary
-    if currency_symbol in data['rates']:
+    # Check if the currency symbols exist in the rates dictionary
+    if 'INR' in data['rates'] and currency_symbol in data['rates']:
+        inr_value = data['rates']['INR']
         currency_value = data['rates'][currency_symbol]
-        return currency_value
+        return inr_value, currency_value
     else:
         raise ValueError("Invalid currency symbol")
 
 # Example usage
-currency_symbol = 'INR'
-currency_value = get_currency_value(currency_symbol)
-print(f"The value of {currency_symbol} is: {currency_value}")
+def main():
+    currency_symbol = 'USD'
+    inr_value, currency_value = get_currency_value(currency_symbol)
+    print(f"The value of INR is: {inr_value}")
+    print(f"The value of {currency_symbol} is: {currency_value}")
 
-# Example usage
-currency_symbol2 = 'USD'
-currency_value2 = get_currency_value(currency_symbol2)
-print(f"The value of {currency_symbol2} is: {currency_value2}")
+# Call the main function
+main()
