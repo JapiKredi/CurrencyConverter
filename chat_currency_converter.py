@@ -7,13 +7,18 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY.txt")
 
 messages = [
-    {"role": "system", "content": "You are a developer."},
-    {"role": "user", "content": "Hello, I need help with my code."},
-    {"role": "assistant", "content": "Sure, I'd be happy to help. What's the problem?"},
-]
+    {"role": "user", "content": "What is the exchange rate between USD and INR?"}]
+
 response = openai.ChatCompletion.create(
     model = 'gpt3.5-turbo',
-    messages
+    messages=messages)
+
+output = response.choices[0].message.content
+
+print(output)
+
+
+
 
 
 
