@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 API_Key.txt
 .DS_Store
+OPENAI_API_KEY.txt
