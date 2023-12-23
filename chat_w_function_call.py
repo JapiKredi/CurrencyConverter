@@ -101,174 +101,34 @@ def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MO
         print(f"Exception: {e}")
         return e
 
-
-
-
-################################
-def start_chat_completion(prompt):
-    # Define the parameters for the chat completion API call
-    parameters = {
-        'model': 'gpt-3.5-turbo',
-        'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': prompt}],
-        'max_tokens': 100,
-        'temperature': 0.7,
-        'n': 1,
-        'stop': None
-    }
-
-    # Call the OpenAI API to get the chat completion response
-    response = openai.Completion.create(**parameters)
-
-    # Extract the generated message from the API response
-    message = response.choices[0].message
-
-    # Return the generated message content
-    return message['content']
-
-# Example usage
-def main():
-    prompt = "What is the weather like today?"
-    completion = start_chat_completion(prompt)
-    print(completion)
-
-# Call the main function
-main()
-
-################################
-
-
-
-
-
-
-# Defines a list of two tools, each represented as a dictionary. 
-# These tools are both used for weather-related functionality.
-# The first tool is a function that returns the current weather for a given location.
-# The second tool is a function that returns the weather forecast for a given location for a given number of days.
-# The tools list is passed as an argument to the chat_completion_request function.
-# The chat_completion_request function makes a POST request to the OpenAI API endpoint https://api.openai.com/v1/chat/completions with the headers and JSON payload.
-# It expects to receive a response from the API.
-# If the request is successful, the function returns the response.
-
-# The first tool consists of the following properties:
-# 1: type: The type of tool. In this case, the type is "function".
-# 2: function: A dictionary containing the name, description, and parameters of the function.
-# 3: name: The name of the function.
-# 4: description: A description of the function.
-# 5: parameters: A dictionary containing the parameters of the function.
-# 5a: type: The type of parameter. In this case, the type is "object".
-# 5b: properties: A dictionary containing the properties of the parameter.
-# 5b1: "location: A dictionary containing the type and description of the location parameter.
-# 5b2: "format": A string parameter representing the temperature unit to use, with possible values of "celsius" or "fahrenheit". It is inferred from the user's location.
-# 5c: required: A list of required parameters. In this case, the required parameters are "location" and "format".
-# The second tool also consists of the property 'num_days': The number of days to forecas
-
 tools = [
     {
         "type": "function",
         "function": {
-            "name": "get_current_weather",
-            "description": "Get the current weather",
+            "name": "get_currency_symbol",
+            "description": "Get the current currency symbol",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "location": {
+                    "currency_symbol": {
                         "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
-                    },
-                    "format": {
-                        "type": "string",
-                        "enum": ["celsius", "fahrenheit"],
-                        "description": "The temperature unit to use. Infer this from the users location.",
-                    },
-                },
-                "required": ["location", "format"],
-            },
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_n_day_weather_forecast",
-            "description": "Get an N-day weather forecast",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
-                    },
-                    "format": {
-                        "type": "string",
-                        "enum": ["celsius", "fahrenheit"],
-                        "description": "The temperature unit to use. Infer this from the users location.",
-                    },
-                    "num_days": {
-                        "type": "integer",
-                        "description": "The number of days to forecast",
+                        "description": "The currency symbol, e.g. USD for US Dollar"
                     }
                 },
-                "required": ["location", "format", "num_days"]
-            },
+                "required": ["currency_symbol"]
+            }
         }
-    },
+    }
 ]
-
-
-messages = []
-messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "What's the weather like today. I am in Glascow Scotland"})
-chat_response = chat_completion_request(
-    messages, tools=tools
-)
-assistant_message = chat_response.json()["choices"][0]["message"]
-messages.append(assistant_message)
-print(assistant_message)
-pretty_print_conversation(messages)
-
-messages = []
-messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "what is the weather going to be like in Glasgow, Scotland over the next x days"})
-chat_response = chat_completion_request(
-    messages, tools=tools
-)
-assistant_message = chat_response.json()["choices"][0]["message"]
-messages.append(assistant_message)
-print(assistant_message)
-pretty_print_conversation(messages)
-
-messages.append({"role": "user", "content": "5 days"})
-chat_response = chat_completion_request(
-    messages, tools=tools
-)
-chat_response.json()["choices"][0]
-
-print(assistant_message)
-pretty_print_conversation(messages)
-
-
 
 # In the following code we are forcing the model to use the get_n_day_weather_forecast function by specifying the tool_choice parameter in the chat_completion_request function.
 messages = []
 messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "Give me a weather report for Toronto, Canada."})
+messages.append({"role": "user", "content": "What currency do you want to use?"})
+messages.append({"role": "system", "content": "Please try to get the currency the user wants to use, and convert this in the currecny symbol that consists of 3 capital letters"})
+
 chat_response = chat_completion_request(
-    messages, tools=tools, tool_choice={"type": "function", "function": {"name": "get_n_day_weather_forecast"}}
-)
-
-assistant_message = chat_response.json()["choices"][0]["message"]
-messages.append(assistant_message)
-print(assistant_message)
-pretty_print_conversation(messages)
-
-
-# In the following code we NOT are forcing the model to use the get_n_day_weather_forecast function by specifying the tool_choice parameter in the chat_completion_request function.
-
-messages = []
-messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "Give me a weather report for Toronto, Canada."})
-chat_response = chat_completion_request(
-    messages, tools=tools
+    messages, tools=tools, tool_choice={"type": "function", "function": {"name": "get_currency_symbol"}}
 )
 
 assistant_message = chat_response.json()["choices"][0]["message"]
@@ -278,33 +138,7 @@ pretty_print_conversation(messages)
 
 
 
-messages = []
-messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "Give me the current weather (use Celcius) for Toronto, Canada."})
-chat_response = chat_completion_request(
-    messages, tools=tools, tool_choice="none"
-)
 
-assistant_message = chat_response.json()["choices"][0]["message"]
-messages.append(assistant_message)
-print(assistant_message)
-pretty_print_conversation(messages)
-
-
-
-# Paralell Function calling. GPT3.5 turno and GPT4 can call multiple functions at the same time. 
-
-messages = []
-messages.append({"role": "system", "content": "Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous."})
-messages.append({"role": "user", "content": "what is the weather going to be like in San Francisco and Glasgow over the next 4 days"})
-chat_response = chat_completion_request(
-    messages, tools=tools, model='gpt-3.5-turbo-1106'
-)
-
-chat_response.json()
-assistant_message = chat_response.json()["choices"][0]["message"]['tool_calls']
-messages.append(assistant_message)
-print(assistant_message)
 
 
 
