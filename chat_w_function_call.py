@@ -79,6 +79,8 @@ def pretty_print_conversation(messages):
 # f the request is successful, the function returns the response. 
 # If an exception occurs during the request, it prints an error message and returns the exception object.
 
+GPT_MODEL = 'gpt-3.5-turbo-1106'
+
 def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MODEL):
     headers = {
         "Content-Type": "application/json",
