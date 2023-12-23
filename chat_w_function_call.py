@@ -8,42 +8,6 @@
 
 import openai
 import os
-
-# Read the OpenAI Api_key
-openai.api_key = open("OPENAI_API_KEY.txt", "r").read().strip()
-
-
-def start_chat_completion(prompt):
-    # Define the parameters for the chat completion API call
-    parameters = {
-        'model': 'gpt-3.5-turbo',
-        'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': prompt}],
-        'max_tokens': 100,
-        'temperature': 0.7,
-        'n': 1,
-        'stop': None
-    }
-
-    # Call the OpenAI API to get the chat completion response
-    response = openai.Completion.create(**parameters)
-
-    # Extract the generated message from the API response
-    message = response.choices[0].message
-
-    # Return the generated message content
-    return message['content']
-
-# Example usage
-def main():
-    prompt = "What is the weather like today?"
-    completion = start_chat_completion(prompt)
-    print(completion)
-
-# Call the main function
-main()
-
-
-
 import json
 import openai
 import os
@@ -52,10 +16,35 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from termcolor import colored
 from dotenv import load_dotenv
 
-GPT_MODEL = "gpt-3.5-turbo-0613"
+# Read the OpenAI Api_key
+openai.api_key = open("OPENAI_API_KEY.txt", "r").read().strip()
 
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# This function visually displays a conversation by printing each message with its role and content in a specific color, making it easier to distinguish between different roles in the conversation.
+# The pretty_print_conversation function takes a list of messages as input and prints each message in a formatted way, assigning different colors to different roles in the conversation.
+# Defines a dictionary role_to_color that maps each role ("system", "user", "assistant", "tool") to a corresponding color ("red", "green", "blue", "magenta").
+# Iterates over each message in the messages list. For example: If the role of the message is "system", it prints the message with the prefix "system:" in the corresponding color.
+# If the role of the message is "assistant" and the message has a key "function_call", it prints the message with the prefix "assistant:" and the value of the "function_call" key in the corresponding color.
+
+def pretty_print_conversation(messages):
+    role_to_color = {
+        "system": "red",
+        "user": "green",
+        "assistant": "blue",
+        "tool": "magenta",
+    }
+    
+    for message in messages:
+        if message["role"] == "system":
+            print(colored(f"system: {message['content']}\n", role_to_color[message["role"]]))
+        elif message["role"] == "user":
+            print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
+        elif message["role"] == "assistant" and message.get("function_call"):
+            print(colored(f"assistant: {message['function_call']}\n", role_to_color[message["role"]]))
+        elif message["role"] == "assistant" and not message.get("function_call"):
+            print(colored(f"assistant: {message['content']}\n", role_to_color[message["role"]]))
+        elif message["role"] == "tool":
+            print(colored(f"function ({message['name']}): {message['content']}\n", role_to_color[message["role"]]))
+
 
 # the @retry decorator is being used to retry the decorated function in case of failures or exceptions. 
 # It provides a way to automatically retry the function multiple times with a delay between each retry.
@@ -64,6 +53,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # The function will be retried for a maximum of 3 attempts. 
 # If the function still fails after 3 attempts, the exception will be raised.
 @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
+
 
 # The chat_completion_request function is a Python function that sends a chat completion request to the OpenAI API. 
 # It takes several parameters:
@@ -111,31 +101,44 @@ def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MO
         print(f"Exception: {e}")
         return e
 
-# This function visually displays a conversation by printing each message with its role and content in a specific color, making it easier to distinguish between different roles in the conversation.
-# The pretty_print_conversation function takes a list of messages as input and prints each message in a formatted way, assigning different colors to different roles in the conversation.
-# Defines a dictionary role_to_color that maps each role ("system", "user", "assistant", "tool") to a corresponding color ("red", "green", "blue", "magenta").
-# Iterates over each message in the messages list. For example: If the role of the message is "system", it prints the message with the prefix "system:" in the corresponding color.
-# If the role of the message is "assistant" and the message has a key "function_call", it prints the message with the prefix "assistant:" and the value of the "function_call" key in the corresponding color.
 
-def pretty_print_conversation(messages):
-    role_to_color = {
-        "system": "red",
-        "user": "green",
-        "assistant": "blue",
-        "tool": "magenta",
+
+
+################################
+def start_chat_completion(prompt):
+    # Define the parameters for the chat completion API call
+    parameters = {
+        'model': 'gpt-3.5-turbo',
+        'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': prompt}],
+        'max_tokens': 100,
+        'temperature': 0.7,
+        'n': 1,
+        'stop': None
     }
-    
-    for message in messages:
-        if message["role"] == "system":
-            print(colored(f"system: {message['content']}\n", role_to_color[message["role"]]))
-        elif message["role"] == "user":
-            print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
-        elif message["role"] == "assistant" and message.get("function_call"):
-            print(colored(f"assistant: {message['function_call']}\n", role_to_color[message["role"]]))
-        elif message["role"] == "assistant" and not message.get("function_call"):
-            print(colored(f"assistant: {message['content']}\n", role_to_color[message["role"]]))
-        elif message["role"] == "tool":
-            print(colored(f"function ({message['name']}): {message['content']}\n", role_to_color[message["role"]]))
+
+    # Call the OpenAI API to get the chat completion response
+    response = openai.Completion.create(**parameters)
+
+    # Extract the generated message from the API response
+    message = response.choices[0].message
+
+    # Return the generated message content
+    return message['content']
+
+# Example usage
+def main():
+    prompt = "What is the weather like today?"
+    completion = start_chat_completion(prompt)
+    print(completion)
+
+# Call the main function
+main()
+
+################################
+
+
+
+
 
 
 # Defines a list of two tools, each represented as a dictionary. 
